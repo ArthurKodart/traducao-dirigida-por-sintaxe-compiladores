@@ -1,73 +1,67 @@
 public class Parser {
-    private byte[] input;
-    private int current;
+    private Scanner scanner;
+    private Scanner.Token lookahead;
 
     public Parser(byte[] input) {
-        this.input = input;
-        this.current = 0;
+        this.scanner = new Scanner(input);
+        this.lookahead = scanner.nextToken();
+    }
+
+    private void match(Scanner.TokenType type) {
+        if (lookahead.type == type) {
+            lookahead = scanner.nextToken();
+        } else {
+            throw new Error("Erro de sintaxe: esperado " + type + " mas encontrado " + lookahead.type);
+        }
     }
 
     public void parse() {
         expr();
-        if (peek() != '\0') {
-            throw new Error("Erro: caracteres restantes após o fim da expressão.");
+
+        if (lookahead.type != Scanner.TokenType.EOF) {
+            throw new Error("Erro: tokens restantes após o fim da expressão.");
         }
     }
 
-
-    private char peek() {
-        if (current < input.length)
-            return (char) input[current];
-        return '\0';
-    }
-
-    private void match(char c) {
-        if (c == peek()) {
-            current++;
-        } else {
-            throw new Error("Erro de sintaxe: esperado '" + c + "', encontrado '" + peek() + "'");
-        }
-    }
+    // expr -> number oper
     private void expr() {
-        digit();
+        number();
         oper();
     }
 
-    private void digit() {
-        if (!Character.isDigit(peek())) {
-            throw new Error("Erro de sintaxe: esperado dígito, encontrado '" + peek() + "'");
+    // number -> [0-9]+
+    private void number() {
+        if (lookahead.type == Scanner.TokenType.NUMBER) {
+            System.out.println("push " + lookahead.value);
+            match(Scanner.TokenType.NUMBER);
+        } else {
+            throw new Error("Erro de sintaxe: esperado número, encontrado " + lookahead.type);
         }
-
-        StringBuilder num = new StringBuilder();
-        while (Character.isDigit(peek())) {
-            num.append(peek());
-            match(peek());
-        }
-
-        System.out.println("push " + num);
     }
 
+    // oper -> (+|-|*|/) number oper | ε
     private void oper() {
-        if (peek() == '+') {
-            match('+');
-            digit();
+        if (lookahead.type == Scanner.TokenType.PLUS) {
+            match(Scanner.TokenType.PLUS);
+            number();
             System.out.println("add");
             oper();
-        } else if (peek() == '-') {
-            match('-');
-            digit();
+        } else if (lookahead.type == Scanner.TokenType.MINUS) {
+            match(Scanner.TokenType.MINUS);
+            number();
             System.out.println("sub");
             oper();
-        } else if (peek() == '*') {
-            match('*');
-            digit();
+        } else if (lookahead.type == Scanner.TokenType.MUL) {
+            match(Scanner.TokenType.MUL);
+            number();
             System.out.println("mul");
             oper();
-        } else if (peek() == '/') {
-            match('/');
-            digit();
+        } else if (lookahead.type == Scanner.TokenType.DIV) {
+            match(Scanner.TokenType.DIV);
+            number();
             System.out.println("div");
             oper();
         }
+        // ε: vazio, termina
     }
 }
