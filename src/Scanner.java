@@ -1,25 +1,7 @@
 public class Scanner {
+
     private byte[] input;
     private int current;
-
-    public enum TokenType {
-        NUMBER, PLUS, MINUS, MUL, DIV, EOF
-    }
-
-    public static class Token {
-        public TokenType type;
-        public String value;
-
-        public Token(TokenType type, String value) {
-            this.type = type;
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return "Token(" + type + ", " + value + ")";
-        }
-    }
 
     public Scanner(byte[] input) {
         this.input = input;
@@ -33,40 +15,39 @@ public class Scanner {
     }
 
     private void advance() {
-        current++;
+        char ch = peek();
+        if (ch != '\0') {
+            current++;
+        }
     }
 
-    public Token nextToken() {
-        // Ignorar espaços em branco
-        while (Character.isWhitespace(peek())) {
+    public char nextToken() {
+        char ch = peek();
+
+        if (Character.isDigit(ch)) {
             advance();
+            return ch;
         }
 
-        char c = peek();
-
-        if (c == '\0') {
-            return new Token(TokenType.EOF, "");
-        } else if (Character.isDigit(c)) {
-            StringBuilder num = new StringBuilder();
-            while (Character.isDigit(peek())) {
-                num.append(peek());
+        switch (ch) {
+            case '+':
+            case '-':
                 advance();
-            }
-            return new Token(TokenType.NUMBER, num.toString());
-        } else if (c == '+') {
-            advance();
-            return new Token(TokenType.PLUS, "+");
-        } else if (c == '-') {
-            advance();
-            return new Token(TokenType.MINUS, "-");
-        } else if (c == '*') {
-            advance();
-            return new Token(TokenType.MUL, "*");
-        } else if (c == '/') {
-            advance();
-            return new Token(TokenType.DIV, "/");
-        } else {
-            throw new Error("Erro léxico: caractere inesperado '" + c + "'");
+                return ch;
+            default:
+                break;
         }
+
+        return '\0';
+    }
+
+    public static void main(String[] args) {
+        String input = "4-8+6";
+        Scanner scan = new Scanner(input.getBytes());
+        System.out.println(scan.nextToken());
+        System.out.println(scan.nextToken());
+        System.out.println(scan.nextToken());
+        System.out.println(scan.nextToken());
+        System.out.println(scan.nextToken());
     }
 }
