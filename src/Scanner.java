@@ -5,7 +5,6 @@ public class Scanner {
 
     private byte[] input;
     private int current;
-
     private static final Map<String, TokenType> keywords;
 
     static {

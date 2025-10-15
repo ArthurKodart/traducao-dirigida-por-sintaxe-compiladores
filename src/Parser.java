@@ -1,11 +1,18 @@
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 public class Parser {
 
     private Scanner scan;
     private Token currentToken;
+    private ByteArrayOutputStream buffer;
+    private PrintStream out;
 
     public Parser(byte[] input) {
         scan = new Scanner(input);
         currentToken = scan.nextToken();
+        buffer = new ByteArrayOutputStream();
+        out = new PrintStream(buffer);
     }
 
     private void nextToken() {
@@ -20,75 +27,66 @@ public class Parser {
         }
     }
 
-    // === Regras de Expressão ===
-
-    // term -> number | identifier
+    // === EXPRESSÕES ===
     void term() {
         if (currentToken.type == TokenType.NUMBER) {
-            System.out.println("push " + currentToken.lexeme);
+            out.println("push " + currentToken.lexeme);
             match(TokenType.NUMBER);
         } else if (currentToken.type == TokenType.IDENT) {
-            System.out.println("push " + currentToken.lexeme);
+            out.println("push " + currentToken.lexeme);
             match(TokenType.IDENT);
         } else {
-            throw new Error("syntax error");
+            throw new Error("syntax error in term");
         }
     }
 
-    // oper -> + term oper | - term oper | ε
     void oper() {
         if (currentToken.type == TokenType.PLUS) {
             match(TokenType.PLUS);
             term();
-            System.out.println("add");
+            out.println("add");
             oper();
         } else if (currentToken.type == TokenType.MINUS) {
             match(TokenType.MINUS);
             term();
-            System.out.println("sub");
+            out.println("sub");
             oper();
         }
     }
 
-    // expr -> term oper
     void expr() {
         term();
         oper();
     }
 
-    // === Regras de Comandos ===
-
-    // letStatement -> 'let' identifier '=' expression ';'
+    // === COMANDOS ===
     void letStatement() {
         match(TokenType.LET);
         String id = currentToken.lexeme;
         match(TokenType.IDENT);
         match(TokenType.EQ);
         expr();
-        System.out.println("pop " + id);
+        out.println("pop " + id);
         match(TokenType.SEMICOLON);
     }
 
-    // printStatement -> 'print' expression ';'
     void printStatement() {
         match(TokenType.PRINT);
         expr();
-        System.out.println("print");
+        out.println("print");
         match(TokenType.SEMICOLON);
     }
 
-    // statement -> printStatement | letStatement
     void statement() {
         if (currentToken.type == TokenType.PRINT) {
             printStatement();
         } else if (currentToken.type == TokenType.LET) {
             letStatement();
         } else {
-            throw new Error("syntax error");
+            throw new Error("syntax error in statement");
         }
     }
 
-    // statements -> statement*
     void statements() {
         while (currentToken.type != TokenType.EOF) {
             statement();
@@ -97,5 +95,9 @@ public class Parser {
 
     public void parse() {
         statements();
+    }
+
+    public String output() {
+        return buffer.toString();
     }
 }

@@ -1,13 +1,6 @@
 public enum TokenType {
     PLUS, MINUS, EQ, SEMICOLON,
-
-    // Literals
-    NUMBER,
-    IDENT,
-
-    // Reserved words
-    LET,
-    PRINT,
-
+    NUMBER, IDENT,
+    LET, PRINT,
     EOF
 }
