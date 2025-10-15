@@ -20,6 +20,8 @@ public class Parser {
         }
     }
 
+    // === Regras de Expressão ===
+
     // term -> number | identifier
     void term() {
         if (currentToken.type == TokenType.NUMBER) {
@@ -54,6 +56,8 @@ public class Parser {
         oper();
     }
 
+    // === Regras de Comandos ===
+
     // letStatement -> 'let' identifier '=' expression ';'
     void letStatement() {
         match(TokenType.LET);
@@ -65,7 +69,33 @@ public class Parser {
         match(TokenType.SEMICOLON);
     }
 
+    // printStatement -> 'print' expression ';'
+    void printStatement() {
+        match(TokenType.PRINT);
+        expr();
+        System.out.println("print");
+        match(TokenType.SEMICOLON);
+    }
+
+    // statement -> printStatement | letStatement
+    void statement() {
+        if (currentToken.type == TokenType.PRINT) {
+            printStatement();
+        } else if (currentToken.type == TokenType.LET) {
+            letStatement();
+        } else {
+            throw new Error("syntax error");
+        }
+    }
+
+    // statements -> statement*
+    void statements() {
+        while (currentToken.type != TokenType.EOF) {
+            statement();
+        }
+    }
+
     public void parse() {
-        letStatement();
+        statements();
     }
 }
