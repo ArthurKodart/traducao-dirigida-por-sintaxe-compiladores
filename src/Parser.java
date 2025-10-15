@@ -12,41 +12,37 @@ public class Parser {
         currentToken = scan.nextToken();
     }
 
-    private void match(TokenType type) {
-        if (currentToken.type == type) {
+    private void match(TokenType t) {
+        if (currentToken.type == t) {
             nextToken();
         } else {
-            throw new Error("syntax error: expected " + type + " but found " + currentToken.type);
+            throw new Error("syntax error: expected " + t + " but found " + currentToken.type);
         }
     }
 
-    void digit() {
-        if (currentToken.type == TokenType.NUMBER) {
-            System.out.println("push " + currentToken.lexeme);
-            match(TokenType.NUMBER);
-        } else {
-            throw new Error("syntax error at " + currentToken.lexeme);
-        }
+    void number() {
+        System.out.println("push " + currentToken.lexeme);
+        match(TokenType.NUMBER);
     }
 
     void oper() {
         if (currentToken.type == TokenType.PLUS) {
             match(TokenType.PLUS);
-            digit();
+            number();
             System.out.println("add");
             oper();
         } else if (currentToken.type == TokenType.MINUS) {
             match(TokenType.MINUS);
-            digit();
+            number();
             System.out.println("sub");
             oper();
         } else if (currentToken.type == TokenType.EOF) {
-            // fim da expressão
+            // nada (ϵ)
         }
     }
 
     void expr() {
-        digit();
+        number();
         oper();
     }
 
